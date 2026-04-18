@@ -9,7 +9,7 @@ export default function TheaterHeader() {
                 </p>
             </div>
             <div className="theater-header__action">
-                <span className="badge">Reservas Abiertas</span>
+                <span className="badge">Reserva ya</span>
             </div>
         </header>
     );

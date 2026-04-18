@@ -5,23 +5,16 @@ export function getMaxRowSize(rows: TheaterRow[]): number {
 }
 
 /**
- * Retorna los índices de filas ordenados desde la más cercana al centro
- * hacia los extremos.
+ * Retorna los índices de filas ordenados desde la más cercana al escenario
+ * (Fila A -> 0) hacia el final (Fila G).
  *
  * Ejemplo con 7 filas:
- * [3, 2, 4, 1, 5, 0, 6]
+ * [0, 1, 2, 3, 4, 5, 6]
  */
-export function getRowIndexesByCenterProximity(totalRows: number): number[] {
-    const center = Math.floor(totalRows / 2);
-    const orderedIndexes: number[] = [center];
-
-    for (let offset = 1; offset < totalRows; offset++) {
-        const left = center - offset;
-        const right = center + offset;
-
-        if (left >= 0) orderedIndexes.push(left);
-        if (right < totalRows) orderedIndexes.push(right);
+export function getRowIndexesByStageProximity(totalRows: number): number[] {
+    const orderedIndexes: number[] = [];
+    for (let i = 0; i < totalRows; i++) {
+        orderedIndexes.push(i);
     }
-
     return orderedIndexes;
 }

@@ -1,35 +1,51 @@
 import type { TheaterRow } from '../models/row.model';
-import { getMaxRowSize, getRowIndexesByCenterProximity } from '../utils/theater.utils';
+import { getMaxRowSize, getRowIndexesByStageProximity } from '../utils/theater.utils';
 
 /**
- * Busca un bloque consecutivo de asientos libres dentro de una fila.
- * Si lo encuentra, retorna un Set con sus ids.
- * Si no, retorna un Set vacío.
+ * Busca el bloque consecutivo de asientos libres dentro de una fila 
+ * que esté más cerca del centro horizontal del escenario.
  */
 function findConsecutiveSeatsInRow(row: TheaterRow, quantity: number): Set<number> {
-    let consecutiveSeats: number[] = [];
+    const totalSeats = row.seats.length;
+    const centerIndex = (totalSeats - 1) / 2;
+    
+    let bestBlock: Set<number> | null = null;
+    let minCenterDistance = Infinity;
 
-    for (const seat of row.seats) {
-        if (!seat.estado) {
-            consecutiveSeats.push(seat.id);
-
-            if (consecutiveSeats.length === quantity) {
-                return new Set(consecutiveSeats);
+    for (let i = 0; i <= totalSeats - quantity; i++) {
+        // Revisar si el bloque de tamaño "quantity" a partir de i está libre
+        let isFree = true;
+        const currentBlockIds: number[] = [];
+        
+        for (let j = 0; j < quantity; j++) {
+            const seat = row.seats[i + j];
+            if (seat.estado) {
+                isFree = false;
+                break;
             }
-        } else {
-            consecutiveSeats = [];
+            currentBlockIds.push(seat.id);
+        }
+
+        if (isFree) {
+            // Calcular qué tan cerca del centro está este bloque (usando su índice medio)
+            const blockCenter = i + (quantity - 1) / 2;
+            const distanceToCenter = Math.abs(blockCenter - centerIndex);
+
+            if (distanceToCenter < minCenterDistance) {
+                minCenterDistance = distanceToCenter;
+                bestBlock = new Set(currentBlockIds);
+            }
         }
     }
 
-    return new Set<number>();
+    return bestBlock || new Set<number>();
 }
 
 /**
  * Recibe la cantidad de asientos requerida y devuelve un Set con ids sugeridos.
  * Reglas:
- * - Si quantity > tamaño máximo de una fila => Set vacío
- * - Si no existe un bloque consecutivo suficiente => Set vacío
- * - Se busca primero desde la fila más cercana al centro
+ * - Se busca primero desde la fila más cercana al escenario (A) hacia atrás.
+ * - Dentro de la fila, se prefiere el bloque de asientos más centrado respecto a la pantalla.
  */
 export function suggest(rows: TheaterRow[], quantity: number): Set<number> {
     const maxRowSize = getMaxRowSize(rows);
@@ -38,7 +54,7 @@ export function suggest(rows: TheaterRow[], quantity: number): Set<number> {
         return new Set<number>();
     }
 
-    const orderedRowIndexes = getRowIndexesByCenterProximity(rows.length);
+    const orderedRowIndexes = getRowIndexesByStageProximity(rows.length);
 
     for (const rowIndex of orderedRowIndexes) {
         const row = rows[rowIndex];
