@@ -1,0 +1,1 @@
+export type SeatVisualState = 'available' | 'occupied' | 'suggested';
