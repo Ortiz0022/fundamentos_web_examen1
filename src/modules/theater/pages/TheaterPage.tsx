@@ -1,5 +1,4 @@
 import TheaterHeader from '../components/TheaterHeader';
-import Stage from '../components/Stage';
 import Legend from '../components/Legend';
 import SeatGrid from '../components/SeatGrid';
 import ReservationForm from '../components/ReservationForm';
